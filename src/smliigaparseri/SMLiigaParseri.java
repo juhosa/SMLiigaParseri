@@ -6,6 +6,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+
 
 /**
  *
@@ -16,13 +25,17 @@ public class SMLiigaParseri {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
+    public static int alku;
+    public static int loppu;
+    
+    public static void main(String[] args) throws IOException, ParseException {
         // Puuhaa jotenkin lista et mita kautta haetaan
-        
-        haeKaudenInfot(00,01);
+        alku = 0;
+        loppu = 1;
+        haeKaudenInfot(alku,loppu);
     }
 
-    private static void haeKaudenInfot(int alku, int loppu) throws IOException {
+    private static void haeKaudenInfot(int alku, int loppu) throws IOException, ParseException {
         String url = "http://www.sm-liiga.fi/ottelut.html?b=rs&s=" 
                 + String.format("%02d", alku) + "-" + String.format("%02d", loppu);
         
@@ -36,71 +49,159 @@ public class SMLiigaParseri {
         // tables sisältää joka kuukauden pelit omissa table-elementeissään
         Elements tables = colleft.select(".dataTableDark");
         
-        for(Element table : tables) {
-            kasitteleKuukausi(table);
-            break;
-        }
+        ArrayList<ArrayList<Ottelu>> kuukaudet = new ArrayList<ArrayList<Ottelu>>();
         
+        int tmp = 0;
+        for(Element table : tables) {
+            kuukaudet.add(kasitteleKuukausi(table));
+            tmp++;
+            if(tmp == 1) {
+                break;
+            }
+        }
+        System.out.println("Kuukausia: " + kuukaudet.size());
+        for(ArrayList<Ottelu> ottelu : kuukaudet) {
+            System.out.println("Otteluita kuukaudessa: " + ottelu.size());
+        }
         //System.out.println(tables.get(0).html());
         
         
     }
 
-    private static void kasitteleKuukausi(Element table) throws IOException {
+    private static ArrayList<Ottelu> kasitteleKuukausi(Element table) throws IOException, ParseException {
         //System.out.println(table.html());
-        //Elements tbody = table.getElementsByTag("tbody");
+        
         Element tbody = table.child(0);
-        Elements rivit = tbody.select("tr");
         
+        ArrayList<Ottelu> ottelut = new ArrayList<Ottelu>();
+        
+        String paivaysStr = "";
+        Date pvm = Calendar.getInstance().getTime();
+        Calendar caltmp = new GregorianCalendar();
+        caltmp.setTime(pvm);
+        boolean perakkainenpelipaiva = false;
         // Käsitellään rivit. Ei oteta ensimmäistä, se on vain otsikkoja
-        for(int i = 1; i < tbody.children().size(); i++) { // rivit.size()
-            //System.out.println(rivit.get(i).html());
-            //System.out.println(rivit.get(i).child(7));
-            kasitteleRivi(tbody.child(i)); // rivit.get(i)
-            break;
+        for(int i = 1; i < tbody.children().size(); i++) {
+            String tmpPaiv = tbody.child(i).child(1).text();
+   
+            Date paivays = null;
+            //System.out.println("tmppaiv" + tmpPaiv);
+            // Jos päivämäärä on vaihtunut
+            if(!paivaysStr.equals(tmpPaiv) && !tmpPaiv.equals("")) {
+                
+                if(Integer.parseInt(tmpPaiv.substring(6,8)) <= 12 && Integer.parseInt(tmpPaiv.substring(6,8)) >= 9) {
+                tmpPaiv += String.format("%02d", alku);
+                }
+                else {
+                    tmpPaiv += String.format("%02d", loppu);
+                }
+                
+                Calendar cal = new GregorianCalendar();
+                Locale suomi = new Locale("suomi", "FI");
+                paivays = new SimpleDateFormat("dd.MM.yy", suomi).parse(tmpPaiv.substring(3));
+                cal.setTime(paivays);
+                //System.out.println("saakeli: " +(caltmp.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR)));
+                if(cal.get(Calendar.DAY_OF_YEAR) - caltmp.get(Calendar.DAY_OF_YEAR) == 1) {
+                    perakkainenpelipaiva = true;
+                }
+                else {
+                    perakkainenpelipaiva = false;
+                }
+                pvm = paivays;
+                //System.out.println(cal.get(Calendar.DAY_OF_WEEK)+ " " + cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.MONTH) + " " + cal.get(Calendar.YEAR));
+                paivaysStr = tmpPaiv;
+            }
+            ottelut.add(kasitteleRivi(tbody.child(i), paivaysStr, perakkainenpelipaiva));
+            //System.out.println("Rivi kasitelty ja lisatty. i: " + i);
         }
-        
-        
+       
+        return ottelut;
     }
 
-    private static void kasitteleRivi(Element row) {
-        String attrID = row.attr("id");
-        System.out.println("attrID: " + attrID);
+    private static Ottelu kasitteleRivi(Element row, String pvm, boolean perakkainen) {
+        
+        Ottelu ottelu = new Ottelu();
+        
+//        String attrID = row.attr("id");
+//        System.out.println("attrID: " + attrID);
         
         Elements solut = row.select("td");
         
         //Element solu = solut.get(0);
         Element solu = row.child(0);
-        String pelinumero = solu.select("span").text();
-        System.out.println("numero: " + pelinumero);
+        int pelinumero = Integer.parseInt(solu.select("span").text());
+//        System.out.println("numero: " + pelinumero);
         
-        // Ykkösestä date
-        solu = row.child(1);
-        String pvm = solu.text();
+        // Ykkösestä date Tämäpäs tuleekin muualta
+//        solu = row.child(1);
+//        String pvm = solu.text();
         System.out.println("pvm: " + pvm);
+        System.out.println("Eilen oli pelipaiva: " + perakkainen);
+        // Karsitaan pvm sopiviin osiin
+        String viikonpaiva = pvm.substring(0,2);
+//        System.out.println("Päivä: " + viikonpaiva);
+        
+        String pvmTmp = pvm.substring(3);
+        //System.out.println("pvmTmp: " + pvmTmp);
+        int paiva = Integer.parseInt(pvmTmp.substring(0,2));
+        int kuukausi = Integer.parseInt(pvmTmp.substring(3,5));
+//        System.out.println("paiva:" + paiva + " kuukausi: " + kuukausi);
+        int vuosi;
+        if(kuukausi <= 12 && kuukausi >= 9) {
+            vuosi = alku;
+        }
+        else {
+            vuosi = loppu;
+        }
+        
         
         // Kakkosesta kello
         solu = row.child(2);
         String kello = solu.text();
-        System.out.println("kello: " + kello);
+//        System.out.println("kello: " + kello);
         
         // Kolmosesta joukkueet
         solu = row.child(3);
         String joukkueet = solu.text();
-        System.out.println("Joukkueet: " + joukkueet);
+//        System.out.println("Joukkueet: " + joukkueet);
+        String[] joukTmp = joukkueet.split("-");
+        //System.out.println(joukTmp[0].trim() + " " + joukTmp[1].trim());
+        String koti = joukTmp[0].trim();
+        String vieras = joukTmp[1].trim();
         
         // Nelosesta tulokset
         solu = row.child(4);
         String tulos = solu.text();
-        System.out.println("tulos: " + tulos);
+//        System.out.println("tulos: " + tulos);
+        String[] tulTmp = tulos.split("-");
+        int kotimaalit = Integer.parseInt(tulTmp[0]);
+        int vierasmaalit = Integer.parseInt(tulTmp[1]);
+//        System.out.println("kotimaalit: " + kotimaalit + " vierasmaalit: " 
+//                + vierasmaalit);
         
         // Vitosesta JA/VL
         solu = row.child(5);
         String javl = solu.text();
-        System.out.println("JA/VL: " + javl);
+//        System.out.println("JA/VL: " + javl);
         
         // vika TD yleisö
-        String yleiso = solut.get(solut.size()-1).text();
-        System.out.println("yleiso: " + yleiso);
+        int yleiso = Integer.parseInt(solut.get(solut.size()-1).text());
+//        System.out.println("yleiso: " + yleiso);
+        
+        ottelu.setPelinNumero(pelinumero);
+        ottelu.setViikonpaiva(viikonpaiva);
+        ottelu.setPaiva(paiva);
+        ottelu.setKuukausi(kuukausi);
+        ottelu.setVuosi(vuosi);
+        ottelu.setAika(kello);
+        ottelu.setKoti(koti);
+        ottelu.setVieras(vieras);
+        ottelu.setKodinMaalit(kotimaalit);
+        ottelu.setVieraanMaalit(vierasmaalit);
+        ottelu.setJaVaiVL(javl);
+        ottelu.setYleiso(yleiso);
+        ottelu.setEilenOliPelipaiva(perakkainen);
+        
+        return ottelu;
     }
 }

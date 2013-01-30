@@ -5,12 +5,13 @@ package smliigaparseri;
  * @author juho
  */
 public class Ottelu {
+    private int pelinNumero;
     private String viikonpaiva;
     private int paiva;
     private int kuukausi;
     private int vuosi;
     private int numero;
-    private String kello;
+    private String aika;
     private String koti;
     private String vieras;
     private int kodinMaalit;
@@ -22,6 +23,14 @@ public class Ottelu {
     public Ottelu() {
     }
 
+    public int getPelinNumero() {
+        return pelinNumero;
+    }
+
+    public void setPelinNumero(int pelinNumero) {
+        this.pelinNumero = pelinNumero;
+    }
+    
     public int getNumero() {
         return numero;
     }
@@ -30,12 +39,12 @@ public class Ottelu {
         this.numero = numero;
     }
 
-    public String getKello() {
-        return kello;
+    public String getAika() {
+        return aika;
     }
 
-    public void setKello(String kello) {
-        this.kello = kello;
+    public void setAika(String kello) {
+        this.aika = kello;
     }
 
     public String getKoti() {
