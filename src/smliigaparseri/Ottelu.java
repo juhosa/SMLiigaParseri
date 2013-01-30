@@ -5,6 +5,10 @@ package smliigaparseri;
  * @author juho
  */
 public class Ottelu {
+    private String viikonpaiva;
+    private int paiva;
+    private int kuukausi;
+    private int vuosi;
     private int numero;
     private String kello;
     private String koti;
@@ -13,6 +17,7 @@ public class Ottelu {
     private int vieraanMaalit;
     private String jaVaiVL;
     private int yleiso;
+    private boolean eilenOliPelipaiva;
 
     public Ottelu() {
     }
@@ -80,6 +85,45 @@ public class Ottelu {
     public void setYleiso(int yleiso) {
         this.yleiso = yleiso;
     }
-    
+
+    public String getViikonpaiva() {
+        return viikonpaiva;
+    }
+
+    public void setViikonpaiva(String viikonpaiva) {
+        this.viikonpaiva = viikonpaiva;
+    }
+
+    public int getPaiva() {
+        return paiva;
+    }
+
+    public void setPaiva(int paiva) {
+        this.paiva = paiva;
+    }
+
+    public int getKuukausi() {
+        return kuukausi;
+    }
+
+    public void setKuukausi(int kuukausi) {
+        this.kuukausi = kuukausi;
+    }
+
+    public int getVuosi() {
+        return vuosi;
+    }
+
+    public void setVuosi(int vuosi) {
+        this.vuosi = vuosi;
+    }
+
+    public boolean isEilenOliPelipaiva() {
+        return eilenOliPelipaiva;
+    }
+
+    public void setEilenOliPelipaiva(boolean eilenOliPelipaiva) {
+        this.eilenOliPelipaiva = eilenOliPelipaiva;
+    }
     
 }

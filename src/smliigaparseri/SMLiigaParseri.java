@@ -52,12 +52,8 @@ public class SMLiigaParseri {
         Element tbody = table.child(0);
         Elements rivit = tbody.select("tr");
         
-        /*
-         * Luo pelipäivä
-         */
-        
         // Käsitellään rivit. Ei oteta ensimmäistä, se on vain otsikkoja
-        for(int i = 2; i < tbody.children().size(); i++) { // rivit.size()
+        for(int i = 1; i < tbody.children().size(); i++) { // rivit.size()
             //System.out.println(rivit.get(i).html());
             //System.out.println(rivit.get(i).child(7));
             kasitteleRivi(tbody.child(i)); // rivit.get(i)
