@@ -41,7 +41,7 @@
 41;To;30;9;10;false;KalPa;HIFK;2;1;;4308
 42;To;30;9;10;false;Tappara;TPS;3;1;;4318
 43;To;30;9;10;false;Ässät;HPK;0;2;;3824
-44;Pe;1;10;10;false;SaiPa;Pelicans;4;3;VL;4101
+44;Pe;1;10;10;true;SaiPa;Pelicans;4;3;VL;4101
 45;La;2;10;10;true;HIFK;Ässät;11;3;;6509
 46;La;2;10;10;true;HPK;Blues;6;2;;3177
 47;La;2;10;10;true;Ilves;Jokerit;5;4;JA;5113

@@ -33,7 +33,12 @@ public class SMLiigaParseri {
     public static int alku;
     public static int loppu;
     
+    public static Date pvm = Calendar.getInstance().getTime();
+    public static Calendar caltmp = new GregorianCalendar();
+        
+    
     public static void main(String[] args) throws IOException, ParseException {
+        caltmp.setTime(pvm);
         // Tehdään kaudet jotka haetaan
         ArrayList<Kausi> kaudet = new ArrayList<Kausi>();
         kaudet.add(new Kausi(0, 1));
@@ -86,7 +91,7 @@ public class SMLiigaParseri {
         for(Element table : tables) {
             kuukaudet.add(kasitteleKuukausi(table));
 //            tmp++;
-//            if(tmp == 1) {
+//            if(tmp == 2) {
 //                break;
 //            }
         }
@@ -110,9 +115,9 @@ public class SMLiigaParseri {
         ArrayList<Ottelu> ottelut = new ArrayList<Ottelu>();
         
         String paivaysStr = "";
-        Date pvm = Calendar.getInstance().getTime();
-        Calendar caltmp = new GregorianCalendar();
-        caltmp.setTime(pvm);
+//        Date pvm = Calendar.getInstance().getTime();
+//        Calendar caltmp = new GregorianCalendar();
+//        caltmp.setTime(pvm);
         boolean perakkainenpelipaiva = false;
         // Käsitellään rivit. Ei oteta ensimmäistä, se on vain otsikkoja
         for(int i = 1; i < tbody.children().size(); i++) {
@@ -124,7 +129,7 @@ public class SMLiigaParseri {
             if(!paivaysStr.equals(tmpPaiv) && !tmpPaiv.equals("")) {
                 
                 if(Integer.parseInt(tmpPaiv.substring(6,8)) <= 12 && Integer.parseInt(tmpPaiv.substring(6,8)) >= 9) {
-                tmpPaiv += String.format("%02d", alku);
+                    tmpPaiv += String.format("%02d", alku);
                 }
                 else {
                     tmpPaiv += String.format("%02d", loppu);
@@ -135,8 +140,8 @@ public class SMLiigaParseri {
                 paivays = new SimpleDateFormat("dd.MM.yy", suomi).parse(tmpPaiv.substring(3));
                 cal.setTime(paivays);
                 //System.out.println("saakeli: " +(caltmp.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR)));
-                //System.out.println("CAL day of year: " + cal.get(Calendar.DAY_OF_YEAR));
-                //System.out.println("CALTMP day of year: " + caltmp.get(Calendar.DAY_OF_YEAR));
+//                System.out.println("CAL day of year: " + cal.get(Calendar.DAY_OF_YEAR));
+//                System.out.println("CALTMP day of year: " + caltmp.get(Calendar.DAY_OF_YEAR));
                 if(cal.get(Calendar.DAY_OF_YEAR) - caltmp.get(Calendar.DAY_OF_YEAR) == 1) {
                     perakkainenpelipaiva = true;
                 }
@@ -256,7 +261,7 @@ public class SMLiigaParseri {
                     item.append(";");
                     item.append(ottelu.getKuukausi());
                     item.append(";");
-                    item.append(ottelu.getVuosi());
+                    item.append(String.format("%02d", ottelu.getVuosi()));
                     item.append(";");
                     item.append(ottelu.isEilenOliPelipaiva());
                     item.append(";");
