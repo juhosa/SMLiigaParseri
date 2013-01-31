@@ -1,11 +1,16 @@
 package smliigaparseri;
 
+import java.io.BufferedWriter;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -44,17 +49,24 @@ public class SMLiigaParseri {
         kaudet.add(new Kausi(10, 11));
         kaudet.add(new Kausi(11, 12));
         
-        ArrayList<ArrayList<Ottelu>> pelit = new ArrayList<ArrayList<Ottelu>>();
-        
         // Haetaan kausien tiedot
         for(Kausi kausi : kaudet) {
             alku = kausi.getAlku();
             loppu = kausi.getLoppu();
-            pelit.add(haeKaudenInfot(alku,loppu));
+            kausi.setKuukaudet((haeKaudenInfot(alku,loppu)));
         }
+        
+        // Kirjotellaan tiedostoon jutut
+        System.out.println("Aloitetaan kirjoitus");
+        for(Kausi kausi : kaudet) {
+            writeFile("kausi" + String.format("%02d", kausi.getAlku()) + "-" 
+                    + String.format("%02d", kausi.getLoppu()) + ".txt", kausi);
+            System.out.println("Kausi kirjoitettu");
+        }
+        System.out.println("Kirjoitus tehty");
     }
 
-    private static ArrayList<Ottelu> haeKaudenInfot(int alku, int loppu) throws IOException, ParseException {
+    private static ArrayList<ArrayList<Ottelu>> haeKaudenInfot(int alku, int loppu) throws IOException, ParseException {
         String url = "http://www.sm-liiga.fi/ottelut.html?b=rs&s=" 
                 + String.format("%02d", alku) + "-" + String.format("%02d", loppu);
         
@@ -228,5 +240,42 @@ public class SMLiigaParseri {
         ottelu.setEilenOliPelipaiva(perakkainen);
         
         return ottelu;
+    }
+    
+    public static void writeFile(String name, Kausi kausi) throws IOException{
+        Path path = Paths.get(name);
+        try(BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.ISO_8859_1)) {
+            for(ArrayList<Ottelu> kuukaudet : kausi.getKuukaudet()) {
+                for(Ottelu ottelu : kuukaudet) {
+                    StringBuilder item = new StringBuilder();
+                    item.append(ottelu.getPelinNumero());
+                    item.append(";");
+                    item.append(ottelu.getViikonpaiva());
+                    item.append(";");
+                    item.append(ottelu.getPaiva());
+                    item.append(";");
+                    item.append(ottelu.getKuukausi());
+                    item.append(";");
+                    item.append(ottelu.getVuosi());
+                    item.append(";");
+                    item.append(ottelu.isEilenOliPelipaiva());
+                    item.append(";");
+                    item.append(ottelu.getKoti());
+                    item.append(";");
+                    item.append(ottelu.getVieras());
+                    item.append(";");
+                    item.append(ottelu.getKodinMaalit());
+                    item.append(";");
+                    item.append(ottelu.getVieraanMaalit());
+                    item.append(";");
+                    item.append(ottelu.getJaVaiVL());
+                    item.append(";");
+                    item.append(ottelu.getYleiso());
+                    
+                    writer.write(item.toString());
+                    writer.newLine();
+                }
+            }
+        }
     }
 }

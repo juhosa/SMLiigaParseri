@@ -45,5 +45,7 @@ public class Kausi {
         this.kuukaudet = kuukaudet;
     }
     
-    
+    public void lisaaKuukausiin(ArrayList<Ottelu> kk) {
+        this.kuukaudet.add(kk);
+    }
 }
