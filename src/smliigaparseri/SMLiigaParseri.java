@@ -29,17 +29,36 @@ public class SMLiigaParseri {
     public static int loppu;
     
     public static void main(String[] args) throws IOException, ParseException {
-        // Puuhaa jotenkin lista et mita kautta haetaan
-        alku = 0;
-        loppu = 1;
-        haeKaudenInfot(alku,loppu);
+        // Tehdään kaudet jotka haetaan
+        ArrayList<Kausi> kaudet = new ArrayList<Kausi>();
+        kaudet.add(new Kausi(0, 1));
+        kaudet.add(new Kausi(1, 2));
+        kaudet.add(new Kausi(2, 3));
+        kaudet.add(new Kausi(3, 4));
+        kaudet.add(new Kausi(4, 5));
+        kaudet.add(new Kausi(5, 6));
+        kaudet.add(new Kausi(6, 7));
+        kaudet.add(new Kausi(7, 8));
+        kaudet.add(new Kausi(8, 9));
+        kaudet.add(new Kausi(9, 10));
+        kaudet.add(new Kausi(10, 11));
+        kaudet.add(new Kausi(11, 12));
+        
+        ArrayList<ArrayList<Ottelu>> pelit = new ArrayList<ArrayList<Ottelu>>();
+        
+        // Haetaan kausien tiedot
+        for(Kausi kausi : kaudet) {
+            alku = kausi.getAlku();
+            loppu = kausi.getLoppu();
+            pelit.add(haeKaudenInfot(alku,loppu));
+        }
     }
 
-    private static void haeKaudenInfot(int alku, int loppu) throws IOException, ParseException {
+    private static ArrayList<Ottelu> haeKaudenInfot(int alku, int loppu) throws IOException, ParseException {
         String url = "http://www.sm-liiga.fi/ottelut.html?b=rs&s=" 
                 + String.format("%02d", alku) + "-" + String.format("%02d", loppu);
         
-        System.out.println("Hakee sivua " + url + "...");
+        System.out.println("Hakee sivua " + url + " ...");
         
         Document doc = Jsoup.connect(url).get();
         Elements divs = doc.select("#content");
@@ -54,17 +73,20 @@ public class SMLiigaParseri {
         int tmp = 0;
         for(Element table : tables) {
             kuukaudet.add(kasitteleKuukausi(table));
-            tmp++;
-            if(tmp == 1) {
-                break;
-            }
+//            tmp++;
+//            if(tmp == 1) {
+//                break;
+//            }
         }
-        System.out.println("Kuukausia: " + kuukaudet.size());
+        System.out.println("Kausi " + String.format("%02d", alku) + "-" 
+                + String.format("%02d", loppu) + " käsitelty");
+        System.out.println("Pelikuukausia: " + kuukaudet.size());
         for(ArrayList<Ottelu> ottelu : kuukaudet) {
             System.out.println("Otteluita kuukaudessa: " + ottelu.size());
         }
-        //System.out.println(tables.get(0).html());
+        System.out.println();
         
+        return kuukaudet;
         
     }
 
@@ -101,6 +123,8 @@ public class SMLiigaParseri {
                 paivays = new SimpleDateFormat("dd.MM.yy", suomi).parse(tmpPaiv.substring(3));
                 cal.setTime(paivays);
                 //System.out.println("saakeli: " +(caltmp.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR)));
+                //System.out.println("CAL day of year: " + cal.get(Calendar.DAY_OF_YEAR));
+                //System.out.println("CALTMP day of year: " + caltmp.get(Calendar.DAY_OF_YEAR));
                 if(cal.get(Calendar.DAY_OF_YEAR) - caltmp.get(Calendar.DAY_OF_YEAR) == 1) {
                     perakkainenpelipaiva = true;
                 }
@@ -108,6 +132,7 @@ public class SMLiigaParseri {
                     perakkainenpelipaiva = false;
                 }
                 pvm = paivays;
+                caltmp.setTime(pvm);
                 //System.out.println(cal.get(Calendar.DAY_OF_WEEK)+ " " + cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.MONTH) + " " + cal.get(Calendar.YEAR));
                 paivaysStr = tmpPaiv;
             }
@@ -135,8 +160,8 @@ public class SMLiigaParseri {
         // Ykkösestä date Tämäpäs tuleekin muualta
 //        solu = row.child(1);
 //        String pvm = solu.text();
-        System.out.println("pvm: " + pvm);
-        System.out.println("Eilen oli pelipaiva: " + perakkainen);
+//        System.out.println("pvm: " + pvm);
+//        System.out.println("Eilen oli pelipaiva: " + perakkainen);
         // Karsitaan pvm sopiviin osiin
         String viikonpaiva = pvm.substring(0,2);
 //        System.out.println("Päivä: " + viikonpaiva);
