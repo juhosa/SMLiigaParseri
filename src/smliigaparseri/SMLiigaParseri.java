@@ -208,8 +208,8 @@ public class SMLiigaParseri {
 //        System.out.println("Joukkueet: " + joukkueet);
         String[] joukTmp = joukkueet.split("-");
         //System.out.println(joukTmp[0].trim() + " " + joukTmp[1].trim());
-        String koti = joukTmp[0].trim();
-        String vieras = joukTmp[1].trim();
+        String koti = joukkueenNimi(joukTmp[0].trim());
+        String vieras = joukkueenNimi(joukTmp[1].trim());
         
         // Nelosesta tulokset
         solu = row.child(4);
@@ -282,5 +282,31 @@ public class SMLiigaParseri {
                 }
             }
         }
+    }
+    
+    public static String joukkueenNimi(String nimi) {
+        String ret;
+        
+        if(nimi.toLowerCase().equals("saipa")) {
+            ret = "SaiPa";
+            return ret;
+        }
+        if(nimi.toLowerCase().equals("kalpa")) {
+            ret = "KalPa";
+            return ret;
+        }
+        if(nimi.toLowerCase().equals("hifk")) {
+            return "HIFK";
+        }
+        if(nimi.toLowerCase().equals("jyp")) {
+            return "JYP";
+        }
+        if(nimi.toLowerCase().equals("hpk")) {
+            return "HPK";
+        }
+        if(nimi.toLowerCase().equals("tps")) {
+            return "TPS";
+        }
+        return nimi;
     }
 }
